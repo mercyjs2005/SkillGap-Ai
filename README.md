@@ -1,5 +1,7 @@
 # SkillGap AI
 
+**Live demo:** [skillgap-hazel.vercel.app](https://skillgap-hazel.vercel.app/)
+
 A full-stack preparation platform for students and early-career developers. It brings together resume analysis, skill-gap reporting, role matching, learning paths, coding and scenario assessments, and project interview practice.
 
 ## Features
