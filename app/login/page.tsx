@@ -42,26 +42,91 @@ function LoginContent() {
 
     setLoading(true);
 
-    // Mock auth API call
-    setTimeout(() => {
+    try {
+      const endpoint = activeTab === "signup" ? "/api/auth/register" : "/api/auth/login";
+      const payload = activeTab === "signup" ? { name, email, password } : { email, password };
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Authentication failed");
+      }
+
       setLoading(false);
       if (activeTab === "signup") {
-        setSuccessMsg("Account verification link sent to your email!");
+        setSuccessMsg("Account registered successfully! Loading onboarding...");
         setTimeout(() => {
-          router.push("/verify-email");
+          router.push("/onboarding");
         }, 1500);
       } else {
-        router.push("/onboarding");
+        router.push("/dashboard");
       }
-    }, 1200);
+    } catch (err: any) {
+      setLoading(false);
+      setError(err.message || "An unexpected error occurred.");
+    }
   };
 
   const triggerGoogleLogin = () => {
+    if (typeof window === "undefined" || !(window as any).google) {
+      alert("Google Sign-In script is loading. Please wait a moment and try again.");
+      return;
+    }
+    
     setLoading(true);
-    setTimeout(() => {
+    setError("");
+    
+    try {
+      const google = (window as any).google;
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "777322967160-c44f33r7ld86c12l0j6c1m06k2s6344u.apps.googleusercontent.com",
+        scope: "email profile openid",
+        callback: async (tokenResponse: any) => {
+          if (tokenResponse.error) {
+            setLoading(false);
+            setError(tokenResponse.error_description || "Google authorization failed");
+            return;
+          }
+          
+          try {
+            const res = await fetch("/api/auth/google-token", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ accessToken: tokenResponse.access_token }),
+            });
+            
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.error || "Google login validation failed");
+            }
+            
+            if (data.isNew) {
+              setSuccessMsg("Logged in with Google! Loading onboarding...");
+              setTimeout(() => {
+                setLoading(false);
+                router.push("/onboarding");
+              }, 1500);
+            } else {
+              setLoading(false);
+              router.push("/dashboard");
+            }
+          } catch (err: any) {
+            setLoading(false);
+            setError(err.message || "Failed to log in with Google.");
+          }
+        }
+      });
+      
+      client.requestAccessToken();
+    } catch (err: any) {
       setLoading(false);
-      router.push("/onboarding");
-    }, 1000);
+      setError(err.message || "An unexpected error occurred during Google Sign-in initialization.");
+    }
   };
 
   return (

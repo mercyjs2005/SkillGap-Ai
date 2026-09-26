@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SkillGap AI
 
-## Getting Started
+A full-stack preparation platform for students and early-career developers. It brings together resume analysis, skill-gap reporting, role matching, learning paths, coding and scenario assessments, and project interview practice.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Resume analysis with structured feedback and missing-keyword suggestions
+- Job-description matching and personalized skill-gap reports
+- Readiness dashboard and learning path
+- Coding and scenario assessments with AI feedback
+- Project-based interview practice
+- Authentication, profile settings, assessment history, and admin tools
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Next.js App Router, React, TypeScript, Tailwind CSS
+- PostgreSQL with Prisma
+- Gemini and Groq APIs
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Run locally
 
-## Learn More
+1. Install dependencies with `pnpm install`.
+2. Copy `.env.example` to `.env` and fill in the values.
+3. Generate the Prisma client and initialize the database:
 
-To learn more about Next.js, take a look at the following resources:
+   ```sh
+   pnpm exec prisma generate
+   pnpm exec prisma db push
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Start the development server with `pnpm dev`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Environment variables
 
-## Deploy on Vercel
+See `.env.example` for the required database, JWT, and AI provider configuration. Use a long, unique `JWT_SECRET`; do not commit your local `.env` file.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Group project credit
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This repository carries forward the collaborative Skillgap group project developed with [@prakharsf27](https://github.com/prakharsf27). The source project is [prakharsf27/Skillgap](https://github.com/prakharsf27/Skillgap).
+

@@ -13,12 +13,48 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     // Sync initial theme
     const currentTheme = document.documentElement.classList.contains("light") ? "light" : "dark";
     setTheme(currentTheme);
   }, []);
+
+  useEffect(() => {
+    async function loadSession() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        }
+      } catch (err) {
+        console.error("Failed to load sidebar user:", err);
+      }
+    }
+    loadSession();
+  }, []);
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
+  const getInitials = (nameStr: string) => {
+    if (!nameStr) return "SG";
+    return nameStr
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
@@ -48,14 +84,14 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Top Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#0B0B19]/90 backdrop-blur-md border-b border-white/5 z-40 px-6 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[var(--sidebar)]/90 backdrop-blur-md border-b border-[var(--border)] z-40 px-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Brain size={18} className="text-[#6366F1]" />
-          <span className="font-bold text-sm text-white">SkillGap AI</span>
+          <span className="font-bold text-sm text-foreground">SkillGap AI</span>
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="text-white/70 hover:text-white cursor-pointer"
+          className="text-foreground/75 hover:text-foreground cursor-pointer"
         >
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -63,7 +99,7 @@ export default function Sidebar() {
 
       {/* Sidebar Navigation */}
       <aside
-        className={`fixed inset-y-0 left-0 w-64 bg-[#08080F] border-r border-white/5 z-50 transform lg:transform-none lg:opacity-100 transition-all duration-300 flex flex-col pt-6 pb-8 px-4
+        className={`fixed inset-y-0 left-0 w-64 bg-[var(--sidebar)] border-r border-[var(--border)] z-50 transform lg:transform-none lg:opacity-100 transition-all duration-300 flex flex-col pt-6 pb-8 px-4
           ${mobileOpen ? "translate-x-0 opacity-100" : "-translate-x-full lg:translate-x-0"}
         `}
       >
@@ -72,7 +108,7 @@ export default function Sidebar() {
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center">
             <Brain size={16} className="text-white" />
           </div>
-          <span className="font-bold text-white text-sm tracking-tight">SkillGap AI</span>
+          <span className="font-bold text-foreground text-sm tracking-tight">SkillGap AI</span>
         </div>
 
         {/* Menu Items */}
@@ -87,11 +123,11 @@ export default function Sidebar() {
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer
                   ${isActive 
-                    ? "bg-indigo-500/10 border border-indigo-500/20 text-[#A5B4FC]" 
-                    : "text-white/40 border border-transparent hover:text-white/80 hover:bg-white/[0.02]"}
+                    ? "bg-indigo-500/10 border border-indigo-500/20 text-[#6366F1] dark:text-[#A5B4FC]" 
+                    : "text-foreground/45 border border-transparent hover:text-foreground/80 hover:bg-foreground/[0.02]"}
                 `}
               >
-                <Icon size={16} className={isActive ? "text-[#A5B4FC]" : "text-white/40"} />
+                <Icon size={16} className={isActive ? "text-[#6366F1] dark:text-[#A5B4FC]" : "text-foreground/40"} />
                 {item.label}
               </Link>
             );
@@ -102,7 +138,7 @@ export default function Sidebar() {
         <div className="px-3 mb-4">
           <button
             onClick={toggleTheme}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold border border-white/5 bg-white/[0.02] text-white/50 hover:text-white hover:bg-white/[0.04] transition-all cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold border border-[var(--border)] bg-foreground/[0.01] text-foreground/50 hover:text-foreground hover:bg-foreground/[0.03] transition-all cursor-pointer"
             title="Toggle color theme"
           >
             <span className="flex items-center gap-2">
@@ -114,22 +150,27 @@ export default function Sidebar() {
         </div>
 
         {/* User Footer Profile */}
-        <div className="border-t border-white/5 pt-6 px-3 flex items-center justify-between">
+        <div className="border-t border-[var(--border)] pt-6 px-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">
-              RS
+              {getInitials(user?.name)}
             </div>
-            <div>
-              <div className="text-xs font-semibold text-white">Rahul Sharma</div>
-              <div className="text-[10px] text-white/40">CSE 2024</div>
+            <div className="max-w-[120px] truncate">
+              <div className="text-xs font-semibold text-foreground truncate" title={user?.name || "Guest Account"}>
+                {user?.name || "Guest Account"}
+              </div>
+              <div className="text-[10px] text-foreground/40 truncate" title={user?.targetTrack || "Software Engineer"}>
+                {user?.targetTrack || "Software Engineer"}
+              </div>
             </div>
           </div>
-          <Link
-            href="/login"
-            className="text-white/30 hover:text-red-400 cursor-pointer transition-colors"
+          <button
+            onClick={handleLogout}
+            className="text-foreground/30 hover:text-red-400 cursor-pointer transition-colors"
+            title="Sign Out"
           >
             <LogOut size={16} />
-          </Link>
+          </button>
         </div>
       </aside>
 
